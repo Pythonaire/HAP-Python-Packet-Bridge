@@ -49,9 +49,9 @@ class Radio():
         self.irq = irq
         data = self.rfm69.receive(keep_listening= True, with_header= True, rx_filter=self.server_id)
         if data != None:
-            self.client_id = data[1] #client_id 10 = AM2302 + Moisture
+            self.client_id = data[1] #client_id 10 
             logging.info('data coming from: {0} with RSSI: {1}'.format(self.client_id, self.rfm69.rssi))
-            del data[0:4] # delete the header, to take the payload
+            del data[0:4] # delete the header, just take the payload
             received_data = json.loads(data.decode('utf8').replace("'", '"')) # replace ' with " and convert from json to python dict
             try:
                 response = requests.post(self.url, json=json.dumps(received_data)) # create json format and send
