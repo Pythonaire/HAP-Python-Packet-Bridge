@@ -6,13 +6,13 @@ This repository put together the HAP-Python code from https://github.com/ikalche
 1) HAP-Python modification
     - separate the homebridge communication from the sensor communication
     - enable 433 MHz radio packet
-    - enable silent sensor value updates; means, trigger incoming data in the background and provide them to the homekit interface. Then send the data in 30 minutes interval to the homekit
+    - enable silent sensor values updates; means, trigger incoming data in the background and provide them to the homekit interface. Send the data each 30 minutes  to Apple homekit
 
 2) Adafruit Circuit Python RFM69 Tranceiver
 
-    - instead of permament looping the buffer, trigger the GPIO state DIO
+    - instead of permament looping to read the buffer, trigger the GPIO event state DIO of incoming data
 
 3)  additional
 
     - send the sensor data to other http connected units
-    
+
