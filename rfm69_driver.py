@@ -765,10 +765,10 @@ class RFM69:
             # Handle if the received packet is too small to include the 4 byte
             # RadioHead header--reject this packet and ignore it.
             logging.info('rfm69.receive() - fifo_length: {0}'.format(fifo_length))
-            if fifo_length < 4:
+            if fifo_length < 5:
                 # Invalid packet, ignore it.  However finish reading the FIFO
                 # to clear the packet.
-                device.readinto(self._BUFFER, end=fifo_length)
+                # device.readinto(self._BUFFER, end=fifo_length) , delete because if fifo_length < 5 we have a damaged packet, the function readinto failed 
                 packet = None
             else:
                 packet = bytearray(fifo_length)
