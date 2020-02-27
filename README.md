@@ -2,6 +2,7 @@
 Python Homebridge and 433 MHz Sensors
 
 This repository put together the HAP-Python code from https://github.com/ikalchev/HAP-python, https://github.com/adafruit/Adafruit_CircuitPython_RFM69 and contained some modification.
+Read the linked descriptions to install these libraries. 
 
 1) HAP-Python modification
     - separate the homebridge communication from the sensor communication
