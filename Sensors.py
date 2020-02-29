@@ -57,7 +57,7 @@ class AM2302(Accessory):
         if self.value == None:
             self.value = {"Charge": 0, "Soil":0, "Hum":0, "Temp":0 }
         self.battlevel_char.set_value(self.value["Charge"])
-        # the sensor actually defined 2.4 V as 0, 4.2 V ass 100, the SAMD21/RFM69 needs 1.89 V
+        # the sensor actually defined 2.4 V as 0, 4.2 V as 100, the SAMD21/RFM69 needs 1.89 V
         # if 0 --> 0.51 V left, that shoud be enough to signaling low Power
         if self.value["Charge"] <= 0: # notify StatusLowBattery
             self.battstatus_char.set_value(1)
