@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 
 class SoilSensor(Accessory):
-    """Humidity / Soil Sensor, check incoming new data every 60 seconds."""
+    """Humidity / Soil Sensor, check incoming new data every 30 seconds."""
     category = CATEGORY_SENSOR
     def __init__(self, *args, **kwargs): # with injected rfm69_values
         super().__init__(*args, **kwargs)
@@ -36,7 +36,7 @@ class SoilSensor(Accessory):
         logging.info("Stopping accessory.")
 
 class AM2302(Accessory):
-    """AM2302 combined Sensor, check incoming new data every 60 seconds."""
+    """AM2302 combined Sensor, check incoming new data every 30 seconds."""
 
     category = CATEGORY_SENSOR
 
