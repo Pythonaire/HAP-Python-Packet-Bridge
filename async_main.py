@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 import logging
 import signal
-import sys, threading
 from pyhap.accessory import Accessory, Bridge
 from pyhap.accessory_driver import AccessoryDriver
-from pyhap.const import (CATEGORY_SENSOR)
+from pyhap.const import CATEGORY_SENSOR
 from Transceiver import Radio
 from Sensors import SoilSensor, AM2302
 
@@ -12,10 +11,7 @@ logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 
 DIO_0 = 24
 
-proc = threading.Thread(target=Radio().detect_dio(DIO_0))
-proc.daemon = True
-proc.start()
-proc.join()
+proc = Radio().detect_dio(DIO_0)
 
 def get_bridge(driver):
     bridge = Bridge(driver, 'RFMBridge')
