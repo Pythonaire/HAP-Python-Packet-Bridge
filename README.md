@@ -6,7 +6,7 @@ Use the linked repository to install these libraries.
 
 1) HAP-Python modification
     - separate the homebridge communication from the sensor communication
-    - data handover by gobal variable, no "pickle" or other methods needed
+    - data handover by global variable, no "pickle" or other methods needed
 
 2) Adafruit Circuit Python RFM69 Tranceiver
 
