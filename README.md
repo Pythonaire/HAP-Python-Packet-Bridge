@@ -4,7 +4,7 @@ Python Homebridge and 433 MHz Sensors
 This repository put together the HAP-Python code from https://github.com/ikalchev/HAP-python and  https://github.com/adafruit/Adafruit_CircuitPython_RFM69 with some modification.
 It is tested with a Adafruit Feather M0 RFM69HCW for sensoring and Raspberry Pi Zero W as a bridge.
 
-![Image of hardware] (pic.png)
+![Image of hardware](pic.png)
 
 
 Use the linked repository to install these basic libraries. 
