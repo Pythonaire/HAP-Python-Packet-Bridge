@@ -3,7 +3,7 @@
 Python Homebridge and 433 MHz Sensors - measuring Soil Humidity, Air Humidity and Temperature and send data to the Apple Homekit.
 
 
-![Image of hardware](pic.png)
+![Image of hardware](Image.png)
 
 
 
