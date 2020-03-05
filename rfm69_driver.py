@@ -1,7 +1,7 @@
 # The MIT License (MIT)
 #
 # Copyright (c) 2017 Tony DiCola for Adafruit Industries
-#
+# modified by Pythonaire
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -29,37 +29,19 @@ receiving of packets with RFM69 series radios (433/915Mhz).
 .. note:: This does NOT support advanced RadioHead features like guaranteed delivery--only 'raw'
     packets are currently supported.
 
-.. warning:: This is NOT for LoRa radios!
-
-.. note:: This is a 'best effort' at receiving data using pure Python code--there is not interrupt
-    support so you might lose packets if they're sent too quickly for the board to process them.
-    You will have the most luck using this in simple low bandwidth scenarios like sending and
-    receiving a 60 byte packet at a time--don't try to receive many kilobytes of data at a time!
-
-* Author(s): Tony DiCola
+.. note:: The original code by the Author Tony DiCola is modified by Pythonaire, to support DIO detection. 
+    In this case the DIO detection need to debounce in the calling function
 
 Implementation Notes
 --------------------
 
 **Hardware:**
 
-* Adafruit `RFM69HCW Transceiver Radio Breakout - 868 or 915 MHz - RadioFruit
-  <https://www.adafruit.com/product/3070>`_ (Product ID: 3070)
-
-* Adafruit `RFM69HCW Transceiver Radio Breakout - 433 MHz - RadioFruit
-  <https://www.adafruit.com/product/3071>`_ (Product ID: 3071)
-
-* Adafruit `Feather M0 RFM69HCW Packet Radio - 868 or 915 MHz - RadioFruit
-  <https://www.adafruit.com/product/3176>`_ (Product ID: 3176)
+The Pythonaire modification is tested on
 
 * Adafruit `Feather M0 RFM69HCW Packet Radio - 433 MHz - RadioFruit
   <https://www.adafruit.com/product/3177>`_ (Product ID: 3177)
 
-* Adafruit `Radio FeatherWing - RFM69HCW 900MHz - RadioFruit
-  <https://www.adafruit.com/product/3229>`_ (Product ID: 3229)
-
-* Adafruit `Radio FeatherWing - RFM69HCW 433MHz - RadioFruit
-  <https://www.adafruit.com/product/3230>`_ (Product ID: 3230)
 
 **Software and Dependencies:**
 
@@ -164,8 +146,6 @@ class RFM69:
     :param bool high_power: Indicate if the chip is a high power variant that supports boosted
         transmission power.  The default is True as it supports the common RFM69HCW modules sold by
         Adafruit.
-
-    .. note:: The D0/interrupt line is currently unused by this module and can remain unconnected.
 
     Remember this library makes a best effort at receiving packets with pure Python code.  Trying
     to receive packets too quickly will result in lost data so limit yourself to simple scenarios
@@ -745,12 +725,8 @@ class RFM69:
            the packet is ignored and None is returned.
         """
         # Make sure we are listening for packets.
-        # self.listen()
-        # Wait for the payload_ready interrupt.  This is not ideal and will
-        # surely miss or overflow the FIFO when packets aren't read fast
-        # enough, however it's the best that can be done from Python without
-        # interrupt supports.
-        # Payload ready is set, a packet is in the FIFO.
+        # Pythonaire:
+        # self.listen() no needed here, because we use GPIO event handling
         packet = None
         # Enter idle mode to stop receiving other packets.
         self.idle()
@@ -766,9 +742,10 @@ class RFM69:
             # RadioHead header--reject this packet and ignore it.
             logging.info('rfm69.receive() - fifo_length: {0}'.format(fifo_length))
             if fifo_length < 5:
-                # Invalid packet, ignore it.  However finish reading the FIFO
-                # to clear the packet.
-                # device.readinto(self._BUFFER, end=fifo_length) , delete because if fifo_length < 5 we have a damaged packet, the function readinto failed 
+                # Pythonaire:
+                # set the minimum packet length to 5, because 0-4 are the header
+                # device.readinto(self._BUFFER, end=fifo_length) , delete because if fifo_length < 5 we have a damaged packet, 
+                # the function readinto failed 
                 packet = None
             else:
                 packet = bytearray(fifo_length)
