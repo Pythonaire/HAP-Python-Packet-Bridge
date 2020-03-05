@@ -60,7 +60,7 @@ int ReadBattery() {
   float measuredsoil = analogRead(HUMPIN);
   digitalWrite(HUMPOWER, LOW);
   float maxvalue = 575; //dry
-  float minvalue =275; // difference 300, easier by deviding
+  float minvalue =275; // difference 300, easier deviding
   if (measuredsoil > maxvalue){measuredsoil = maxvalue;} 
   else if (measuredsoil < minvalue){measuredsoil = minvalue;} 
   int result = roundf(((-measuredsoil)+maxvalue)/3);
