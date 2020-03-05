@@ -20,7 +20,7 @@ class SoilSensor(Accessory):
 
     @Accessory.run_at_interval(30)
     async def run(self):
-        self.value = Radio().check_data()
+        self.value = Radio().check_data() # get the stored global value
         if self.value == None:
             self.value = {"Charge": 0, "Soil":0, "Hum":0, "Temp":0 }
         self.battlevel_char.set_value(self.value["Charge"])
@@ -53,7 +53,7 @@ class AM2302(Accessory):
 
     @Accessory.run_at_interval(30)
     async def run(self):
-        self.value = Radio().check_data()
+        self.value = Radio().check_data() # get the stored global value
         if self.value == None:
             self.value = {"Charge": 0, "Soil":0, "Hum":0, "Temp":0 }
         self.battlevel_char.set_value(self.value["Charge"])
@@ -68,4 +68,3 @@ class AM2302(Accessory):
 
     def stop(self):
         logging.info("Stopping accessory.")
-        

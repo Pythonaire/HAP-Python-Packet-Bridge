@@ -28,7 +28,7 @@ class Radio():
      # on the transmitter and receiver (or be set to None to disable/the default).
     rfm69.encryption_key = b'\x01\x02\x03\x04\x05\x06\x07\x08\x01\x02\x03\x04\x05\x06\x07\x08'
 
-    # if you like to share the data with other http-connected units. In this case a Raspberry Pi based stream radio device
+    # if you like to share the data with other http-connected units. Here a Raspberry Pi based stream radio device.
     url = "http://PiRadio.local:8001/postjson"
 
     def __init__(self):
@@ -42,6 +42,7 @@ class Radio():
         self.dio0_pin = dio0_pin
         self.rfm69.listen()
         io.setup(self.dio0_pin, io.IN)
+        # if the selected GPIO port has no 0 as default:
         #io.setup(self.dio0_pin, io.IN,pull_up_down=io.PUD_DOWN)
         logging.info("Start event detection on Pin: {0}".format(self.dio0_pin))
         # to prevent signal flank flickering set bouncetime
