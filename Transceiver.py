@@ -28,12 +28,9 @@ class Radio():
      # on the transmitter and receiver (or be set to None to disable/the default).
     rfm69.encryption_key = b'\x01\x02\x03\x04\x05\x06\x07\x08\x01\x02\x03\x04\x05\x06\x07\x08'
 
-    # if you like to share the data with other http-connected units. Here a Raspberry Pi based stream radio device.
     url = "http://PiRadio.local:8001/postjson"
 
     def __init__(self):
-        # server_id and client_id is needed to know, how sending the data
-        # the client send his own id
         self.server_id = 1 # Server header
         self.client_id = None
         io.setmode(io.BCM)
@@ -42,11 +39,10 @@ class Radio():
         self.dio0_pin = dio0_pin
         self.rfm69.listen()
         io.setup(self.dio0_pin, io.IN)
-        # if the selected GPIO port has no 0 as default:
-        #io.setup(self.dio0_pin, io.IN,pull_up_down=io.PUD_DOWN)
+        # if the selected DIO port have not the default 0 state, we need to set "pull_up_down=io.PUD_DOWN"
+        # io.setup(self.dio0_pin, io.IN,pull_up_down=io.PUD_DOWN)
         logging.info("Start event detection on Pin: {0}".format(self.dio0_pin))
-        # to prevent signal flank flickering set bouncetime
-        io.add_event_detect(self.dio0_pin, io.RISING, callback = self.get_data, bouncetime = 100)
+        io.add_event_detect(self.dio0_pin, io.RISING, callback = self.get_data, bouncetime = 200)
        
         
     def get_data(self, irq):
@@ -54,11 +50,10 @@ class Radio():
         self.irq = irq
         data = self.rfm69.receive(keep_listening= True, with_header= True, rx_filter=self.server_id)
         if data != None:
-            self.client_id = data[1] #get the client_id
+            self.client_id = data[1] #client_id 10 = AM2302 + Moisture
             del data[0:4] # delete the header, to take the payload
             received_data = json.loads(data.decode('utf8').replace("'", '"')) # replace ' with " and convert from json to python dict
-            logging.info('*** from: {0} with RSSI: {1} got : {2}'.format(self.client_id, self.rfm69.rssi, received_data))
-            # if the http-connected unit is down, prevent failure, socket error
+            logging.info('*** from: {0} with RSSI: {1} got : {2}'.format(self.client_id, self.rfm69.last_rssi, received_data))
             try:
                 requests.post(self.url, json=json.dumps(received_data)) # create json format and send
             except socket.error as e:
