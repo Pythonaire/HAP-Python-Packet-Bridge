@@ -23,7 +23,7 @@ The sensor device measure and send data each 30 minutes in a json-like format (s
 
 ### Adafruit CPython RFM69 driver
 
-* instead of permament looping to read the FIFO buffer, i use the GPIO event state to detect incoming data
+* instead of permament looping to read the buffer, GPIO event state is used to detect incoming data
 
 Permanent looping to check the PayloadReady, push the cpu usage of a single core Raspberry Zero up to 100 percent permanently. I use the DIO port and GPIO event to detect incoming data. As tested, debouncing with around 200 ms helps to prevent "bad packets" (mostly seen as packets with wrong sizes).
 
