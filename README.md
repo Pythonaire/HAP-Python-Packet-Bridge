@@ -13,7 +13,7 @@ Use the linked repository to install these basic libraries.
 It is tested with a Adafruit Feather M0 RFM69HCW for sensoring and Raspberry Pi Zero W as a bridge.
 Put the files into your prefered path. Instead of "main.py", delivered by HAP-Python, use "async_main.py" to startup.
 
-## Significant changes/modication
+## Significant changes/modification
 
 ### HAP-Python
 * separate the homebridge communication from the sensor communication
