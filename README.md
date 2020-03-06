@@ -27,6 +27,6 @@ The sensor device measure and send data each 30 minutes in a json-like format (s
 
 Permanent looping to check the PayloadReady, push the cpu usage of a single core Raspberry Zero up to 100 percent permanently. I use the DIO port and GPIO event to detect incoming data. As tested, debouncing with around 200 ms helps to prevent "bad packets" (mostly seen as packets with wrong sizes).
 
-##additional (if needed)
+### additional (if needed)
 
 * send the sensor data to other http connected units
