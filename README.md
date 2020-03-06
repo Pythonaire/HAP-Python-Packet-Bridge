@@ -16,17 +16,17 @@ Put the files into your prefered path. Instead of "main.py", delivered by HAP-Py
 ## Significant changes/modication
 
 ### HAP-Python
-    -separate the homebridge communication from the sensor communication
-    - data buffering and handover by global variable, no "pickle" or other methods needed
+* separate the homebridge communication from the sensor communication
+* data buffering and handover by global variable, no "pickle" or other methods needed
 
-    The sensor device measure and send data each 30 minutes in a json-like format (see sensor_example), then go into "deep sleep mode" to save battery capacity. The bridge detect incoming data by GPIO event. The Apple Homekit app (user GUI) could check the sensor state at any time. Because of a probably sleeping device the last/actually data are stored on the bridge. 
+The sensor device measure and send data each 30 minutes in a json-like format (see sensor_example), then go into "deep sleep mode" to save battery capacity. The bridge detect incoming data by GPIO event. The Apple Homekit app (user GUI) could check the sensor state at any time. Because of a probably sleeping device the last/actually data are stored on the bridge. 
 
 ### Adafruit CPython RFM69 driver
 
-    - instead of permament looping to read the FIFO buffer, i use the GPIO event state to detect incoming data
+* instead of permament looping to read the FIFO buffer, i use the GPIO event state to detect incoming data
 
-    Permanent looping to check the PayloadReady, push the cpu usage of a single core Raspberry Zero up to 100 percent permanently. I use the DIO port and GPIO event to detect incoming data. As tested, debouncing with around 200 ms helps to prevent "bad packets" (mostly seen as packets with wrong sizes).
+Permanent looping to check the PayloadReady, push the cpu usage of a single core Raspberry Zero up to 100 percent permanently. I use the DIO port and GPIO event to detect incoming data. As tested, debouncing with around 200 ms helps to prevent "bad packets" (mostly seen as packets with wrong sizes).
 
 ##additional (if needed)
 
-    - send the sensor data to other http connected units
+* send the sensor data to other http connected units
