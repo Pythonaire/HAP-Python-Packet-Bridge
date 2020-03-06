@@ -19,7 +19,7 @@ Put the files into your prefered path. Instead of "main.py", delivered by HAP-Py
 * separate the homebridge communication from the sensor communication
 * data buffering and handover by global variable, no "pickle" or other methods needed
 
-The sensor device measure and send data each 30 minutes in a json-like format (see sensor_example), then go into "deep sleep mode" to save battery capacity. The bridge detect incoming data by GPIO event. The Apple Homekit app (user GUI) could check the sensor state at any time. Because of a probably sleeping device the last/actually data are stored on the bridge. 
+The sensor device measure and send data each 30 minutes in a json-like format (see sensor_example), then go into "deep sleep mode" to save battery capacity. The bridge detect incoming data by GPIO event. The Apple Homekit app (user GUI) could check the sensor state at any time. Because of a probably sleeping device the last/actually data are stored on the bridge. To prevent SD card read/write error the data are stored as global variable.
 
 ### Adafruit CPython RFM69 driver
 
