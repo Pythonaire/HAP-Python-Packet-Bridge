@@ -50,16 +50,18 @@ class Radio():
         self.irq = irq
         data = self.rfm69.receive(keep_listening= True, with_header= True, rx_filter=self.server_id)
         if data != None:
-            self.client_id = data[1] #client_id 10 = AM2302 + Moisture
+            self.client_id = data[1] #client_id 10 = AM2302 + Moisture, 11 = Cistern
             del data[0:4] # delete the header, to take the payload
             received_data = json.loads(data.decode('utf8').replace("'", '"')) # replace ' with " and convert from json to python dict
             logging.info('*** from: {0} with RSSI: {1} got : {2}'.format(self.client_id, self.rfm69.last_rssi, received_data))
-            try:
-                requests.post(self.url, json=json.dumps(received_data)) # create json format and send
-            except socket.error as e:
-                logging.info('**** request.post got exception {0}'.format(e))
-            except:
-                logging.info("**** Something else went wrong ****")
+            received_data.update({'client':self.client_id})
+            if self.client_id == 10: # Air values from 10
+                try:
+                    requests.post(self.url, json=json.dumps(received_data)) # create json format and send
+                except socket.error as e:
+                    logging.info('**** request.post got exception {0}'.format(e))
+                except:
+                    logging.info("**** Something else went wrong ****")
             return received_data
             
     def check_data(self):
