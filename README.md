@@ -18,6 +18,8 @@ Put the files into your prefered path. Instead of "main.py", delivered by HAP-Py
 ### HAP-Python
 * separate the homebridge communication from the sensor communication
 * data buffering and handover by global variable, no "pickle" or other methods needed
+* each sensor device has different functions and design, but i use the standard HAP Accessory definition. Ex.: for measuring the water left in a cistern, i use a ultrasonic sensor (distance measuring). The value will be calculated in percent and pushed to the Homekit as CurrentRelativeHumidity, to get the "drop sign" and percent value. Because of that, each sensor has a special class definition (see Sensor.py)
+* The sensor device will be identified by a client id to get the correct type and characteristic.
 
 The sensor device measure and send data each 30 minutes in a json-like format (see sensor_example), then go into "deep sleep mode" to save battery capacity. The bridge detect incoming data by GPIO event. The Apple Homekit app (user GUI) could check the sensor state at any time. Because of a probably sleeping device the last/actually data are stored on the bridge. To prevent SD card read/write error the data are stored as global variable.
 
@@ -29,4 +31,6 @@ Permanent looping to check the PayloadReady, push the cpu usage of a single core
 
 ### additional (if needed)
 
+
 * send the sensor data to other http connected units
+
