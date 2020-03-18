@@ -17,20 +17,25 @@ Put the files into your prefered path. Instead of "main.py", delivered by HAP-Py
 
 ### HAP-Python
 * separate the homebridge communication from the sensor communication
-* data buffering and handover by global variable, no "pickle" or other methods needed
-* each sensor device has different functions and design, but i use the standard HAP Accessory definition. Ex.: for measuring the water left in a cistern, i use a ultrasonic sensor (distance measuring). The value will be calculated in percent and pushed to the Homekit as CurrentRelativeHumidity, to get the "drop sign" and percent value. Because of that, each connected device (perhaps with any sensors)  has a special class definition (see Sensor.py)
-* The sensor device will be identified by a client id to get the correct type and characteristic.
+* data buffering and handover by global variable (nested python dictionary), no "pickle" or other methods needed
 
-The sensor device measure and send data each 30 minutes in a json-like format (see sensor_example), then go into "deep sleep mode" to save battery capacity. The bridge detect incoming data by GPIO event. The Apple Homekit app (user GUI) could check the sensor state at any time. Because of a probably sleeping device the last/actually data are stored on the bridge. To prevent SD card read/write error the data are stored as global variable.
+* HAP-Python transfer characteristics and services unchanged/transparent. Here, each sensor device has different functions and partially mixed characteristics and services. Ex.: for measuring the water left in a cistern, i use a ultrasonic sensor (distance measuring). The value will be calculated in percent and pushed to the Homekit as CurrentRelativeHumidity, to get the "drop sign" and percent value. 
+* Each device will be identified by a client id to get the correct type and characteristic.
+
+ ---- client_id
+      ---- sensor classes
+           ---- characteristics
+                ---- values
+
+The sensor device measure and send data  by RTC clock interval in a json-like format (see sensor_example), then go into "deep sleep mode" to save battery capacity. The bridge detect incoming data by GPIO event. The Apple Homekit app (user GUI) could check the sensor state at any time. Because of a probably sleeping device the last/actually data are stored on the bridge to prevent SD card read/write error the data are stored as global variable (mentioned above).
 
 ### Adafruit CPython RFM69 driver
 
 * instead of permament looping to read the buffer, GPIO event state is used to detect incoming data
-
-Permanent looping to check the PayloadReady, push the cpu usage of a single core Raspberry Zero up to 100 percent permanently. I use the DIO port and GPIO event to detect incoming data. As tested, debouncing with around 200 ms helps to prevent "bad packets" (mostly seen as packets with wrong sizes).
+*  Permanent looping to check the PayloadReady, push the cpu usage of a single core Raspberry Zero up to 100 percent permanently. I use the DIO port and GPIO event to detect incoming data. As tested, debouncing with around 200 ms helps to prevent "bad packets" (mostly seen as packets with wrong sizes).
 
 ### additional (if needed)
 
-
 * send the sensor data to other http connected units
+* to speed up the data exchange between transceiver process and HAP-Python (here a raspberry zero w - single core cpu) in case off multiple sensor devices, the transceiver process runs as python thread.
 
