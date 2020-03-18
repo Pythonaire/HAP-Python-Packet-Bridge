@@ -50,13 +50,13 @@ class Radio():
     def get_data(self, irq):
         global devices
         self.irq = irq
+        logging.info("incoming data detected by irq: {0}".format(self.irq))
         data = self.rfm69.receive(keep_listening= True, with_header= True, rx_filter=self.server_id)
         if data != None:
             self.client_id = data[1] #client_id 10 = AM2302 + Moisture, 11 = Cistern
             del data[0:4] # delete the header, to take the payload
             received_data = json.loads(data.decode('utf8').replace("'", '"')) # replace ' with " and convert from json to python dict
             logging.info('*** from: {0} with RSSI: {1} got : {2}'.format(self.client_id, self.rfm69.last_rssi, received_data))
-            #received_data.update({'client':self.client_id})
             if self.client_id == 10: # Air values from 10 to transfer to additional http device
                 try:
                     requests.post(self.url, json=json.dumps(received_data)) # create json format and send

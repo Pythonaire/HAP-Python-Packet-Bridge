@@ -114,6 +114,8 @@ class Ultrasonic(Accessory):
         minValue = 50 # ignore the 50cm of mainanace tube
         if self.value["Dist"] <= minValue:
             WaterPercent = 100
+        elif self.value["Dist"] >= maxValue:
+            WaterPercent = 0
         else:
             AdjustValue = self.value["Dist"] - minValue
             WaterPercent = 100 * AdjustValue / maxValue
