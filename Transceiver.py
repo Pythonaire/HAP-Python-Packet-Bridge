@@ -12,7 +12,7 @@ import requests, socket
 
 
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
-received_data = None # global variable to share received value 
+devices = {} # nested dict to store and share received value 
 
 
 class Radio():
@@ -27,6 +27,7 @@ class Radio():
     # Optionally set an encryption key (16 byte AES key). MUST match both
      # on the transmitter and receiver (or be set to None to disable/the default).
     rfm69.encryption_key = b'\x01\x02\x03\x04\x05\x06\x07\x08\x01\x02\x03\x04\x05\x06\x07\x08'
+    dio0_pin = 24 # Pin connected to the RFM69 chip DIO0
 
     url = "http://PiRadio.local:8001/postjson"
 
@@ -34,19 +35,20 @@ class Radio():
         self.server_id = 1 # Server header
         self.client_id = None
         io.setmode(io.BCM)
-
-    def detect_dio(self, dio0_pin):
-        self.dio0_pin = dio0_pin
-        self.rfm69.listen()
-        io.setup(self.dio0_pin, io.IN)
-        # if the selected DIO port have not the default 0 state, we need to set "pull_up_down=io.PUD_DOWN"
-        # io.setup(self.dio0_pin, io.IN,pull_up_down=io.PUD_DOWN)
-        logging.info("Start event detection on Pin: {0}".format(self.dio0_pin))
-        io.add_event_detect(self.dio0_pin, io.RISING, callback = self.get_data, bouncetime = 200)
-       
         
+        
+    def start(self):
+        self.rfm69.listen()
+        # if the selected DIO port have not the default 0 state, we need to set "pull_up_down=io.PUD_DOWN"
+        logging.info("Start event detection on Pin: {0}".format(self.dio0_pin))
+        io.setup(self.dio0_pin, io.IN,pull_up_down=io.PUD_DOWN)
+        io.add_event_detect(self.dio0_pin, io.RISING, callback = self.get_data, bouncetime = 200)
+
+    def stop(self):
+        io.remove_event_detect(self.dio0_pin)
+       
     def get_data(self, irq):
-        global received_data
+        global devices
         self.irq = irq
         data = self.rfm69.receive(keep_listening= True, with_header= True, rx_filter=self.server_id)
         if data != None:
@@ -54,19 +56,22 @@ class Radio():
             del data[0:4] # delete the header, to take the payload
             received_data = json.loads(data.decode('utf8').replace("'", '"')) # replace ' with " and convert from json to python dict
             logging.info('*** from: {0} with RSSI: {1} got : {2}'.format(self.client_id, self.rfm69.last_rssi, received_data))
-            received_data.update({'client':self.client_id})
-            if self.client_id == 10: # Air values from 10
+            #received_data.update({'client':self.client_id})
+            if self.client_id == 10: # Air values from 10 to transfer to additional http device
                 try:
                     requests.post(self.url, json=json.dumps(received_data)) # create json format and send
                 except socket.error as e:
                     logging.info('**** request.post got exception {0}'.format(e))
                 except:
                     logging.info("**** Something else went wrong ****")
-            return received_data
+                # store data if they are new, or overwrite them if exists in a 
+                # nested dict: {client_id1:{'data1': xxx, ...}, client_id2:{'data1:...}, ....}
+            devices[self.client_id] = received_data 
+            return devices
             
     def check_data(self):
-        global received_data
-        return received_data
+        global devices
+        return devices
 
 
 

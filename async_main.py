@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-#!/usr/bin/env python3
 import logging
-import signal
+import signal, threading
 from pyhap.accessory import Accessory, Bridge
 from pyhap.accessory_driver import AccessoryDriver
 from pyhap.const import CATEGORY_SENSOR
@@ -10,9 +9,10 @@ from Sensors import SoilSensor, AM2302, Ultrasonic
 
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 
-DIO_0 = 24
-
-proc = Radio().detect_dio(DIO_0)
+proc = Radio()
+proc_thread = threading.Thread(target=proc.start())
+proc_thread.daemon = True
+proc_thread.start()
 
 def get_bridge(driver):
     bridge = Bridge(driver, 'RFMBridge')
@@ -25,6 +25,7 @@ driver = AccessoryDriver(port=51826, persist_file='home.state')
 driver.add_accessory(accessory=get_bridge(driver))
 signal.signal(signal.SIGTERM, driver.signal_handler)
 driver.start()
+
       
 
 

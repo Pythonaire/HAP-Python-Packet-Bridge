@@ -22,18 +22,21 @@ class SoilSensor(Accessory):
 
     @Accessory.run_at_interval(30)
     async def run(self):
-        self.value = Radio().check_data()
-        if self.value == None: # prevent error on bridge startup / restart
-            self.value = {"Charge": 0, "Soil":0, "Hum":0, "Temp":0 }
-        elif self.value["client"]== 10: # the device id
-            self.battlevel_char.set_value(self.value["Charge"])
-            # the sensor actually defined 2.4 V as 0, 4.2 V ass 100, the SAMD21/RFM69 needs 1.89 V
-            # if 0 --> 0.51 V left, that shoud be enough to signaling low Power
-            if self.value["Charge"] <= 0: #  notify StatusLowBattery
-                self.battstatus_char.set_value(1)
-            else:
-                self.battstatus_char.set_value(0)
-            self.hum_char.set_value(self.value["Soil"])
+        self.received = Radio().check_data()
+        if 10 not in self.received: # prevent error on bridge startup / restart
+            self.value = {"Charge": 0, "Soil":0}
+        else:
+            self.value = self.received[10]
+
+        self.battlevel_char.set_value(self.value["Charge"])
+        # the sensor actually defined 2.4 V as 0, 4.2 V ass 100, the SAMD21/RFM69 needs 1.89 V
+        # if 0 --> 0.51 V left, that shoud be enough to signaling low Power
+        if self.value["Charge"] <= 0: #  notify StatusLowBattery
+            self.battstatus_char.set_value(1)
+        else:
+            self.battstatus_char.set_value(0)
+        self.hum_char.set_value(self.value["Soil"])
+            
     
     def stop(self):
         logging.info("Stopping accessory.")
@@ -56,19 +59,21 @@ class AM2302(Accessory):
 
     @Accessory.run_at_interval(30)
     async def run(self):
-        self.value = Radio().check_data()
-        if self.value == None: # prevent error on bridge startup / restart
-                self.value = {"Charge": 0, "Soil":0, "Hum":0, "Temp":0 }
-        elif self.value["client"]== 10: # the device id
-            self.battlevel_char.set_value(self.value["Charge"])
-            # the sensor actually defined 2.4 V as 0, 4.2 V ass 100, the SAMD21/RFM69 needs 1.89 V
-            # if 0 --> 0.51 V left, that shoud be enough to signaling low Power
-            if self.value["Charge"] <= 0: # notify StatusLowBattery
-                self.battstatus_char.set_value(1)
-            else:
-                self.battstatus_char.set_value(0)
-            self.hum_char.set_value(self.value["Hum"])
-            self.temp_char.set_value(self.value["Temp"])
+        self.received = Radio().check_data()
+        if 10 not in self.received: # prevent error on bridge startup / restart
+            self.value = {"Charge": 0, "Hum":0, "Temp":0}
+        else:
+            self.value = self.received[10]
+
+        self.battlevel_char.set_value(self.value["Charge"])
+        # the sensor actually defined 2.4 V as 0, 4.2 V ass 100, the SAMD21/RFM69 needs 1.89 V
+        # if 0 --> 0.51 V left, that shoud be enough to signaling low Power
+        if self.value["Charge"] <= 0: # notify StatusLowBattery
+            self.battstatus_char.set_value(1)
+        else:
+            self.battstatus_char.set_value(0)
+        self.hum_char.set_value(self.value["Hum"])
+        self.temp_char.set_value(self.value["Temp"])
 
     def stop(self):
         logging.info("Stopping accessory.")
@@ -88,23 +93,31 @@ class Ultrasonic(Accessory):
 
     @Accessory.run_at_interval(30)
     async def run(self):
-        self.value = Radio().check_data()
-        if self.value == None: # prevent error on bridge startup / restart
-            self.value = {"Charge": 0, "Vol": 0}
-        elif self.value["client"]== 11: # the device id
-            self.battlevel_char.set_value(self.value["Charge"])
-            # the sensor actually defined 2.4 V as 0, 4.2 V ass 100, the SAMD21/RFM69 needs 1.89 V
-            # if 0 --> 0.51 V left, that shoud be enough to signaling low Power
-            if self.value["Charge"] <= 0: #  notify StatusLowBattery
-                self.battstatus_char.set_value(1)
-            else:
-                self.battstatus_char.set_value(0)
-            WaterLeft = 160 - self.value["Vol"]
-            # self.value["Vol"] is the measured distance down to the water surface
-            # around 40 cm over the cistern bottom the float switch shut down the pump (overheading protection)
-            # the measured full distance - bottom of the cistern up to the sensor (maintance tube included) -  is 200 cm, then
-            # the 'pump working range' is 200 - 40 = 160 cm
-            WaterPercent = 100 * WaterLeft / 160
-            self.cist_char.set_value(WaterPercent)
+        self.received = Radio().check_data()
+        if 11 not in self.received: # prevent error on bridge startup / restart
+            self.value = {"Charge": 0, "Dist": 0}
+        else:
+            self.value = self.received[11]
+        self.battlevel_char.set_value(self.value["Charge"])
+        # the sensor actually defined 2.4 V as 0, 4.2 V ass 100, the SAMD21/RFM69 needs 1.89 V
+        # if 0 --> 0.51 V left, that shoud be enough to signaling low Power
+        if self.value["Charge"] <= 0: #  notify StatusLowBattery
+            self.battstatus_char.set_value(1)
+        else:
+            self.battstatus_char.set_value(0)
+        # self.value["Dist"] is the measured distance down to the water surface
+        # the maintanace tube height (diameter 100) is 50 cm - ignore this 
+        # around 40 cm over the cistern bottom the float switch shut down the pump (overheading protection)
+        # the measured full distance - bottom of the cistern up to the sensor (maintance tube included) -  is 202 cm
+        # the 'pump working range' is 202 - 40 - 50 = 112 cm
+        maxValue = 162 # related to the float switch
+        minValue = 50 # ignore the 50cm of mainanace tube
+        if self.value["Dist"] <= minValue:
+            WaterPercent = 100
+        else:
+            AdjustValue = self.value["Dist"] - minValue
+            WaterPercent = 100 * AdjustValue / maxValue
+        self.cist_char.set_value(WaterPercent)
+        
     def stop(self):
         logging.info("Stopping accessory.")
