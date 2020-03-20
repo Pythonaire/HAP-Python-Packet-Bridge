@@ -23,15 +23,7 @@ To change sensor devices, services or characteristics or add additional sensor d
 
 * By default, HAP-Python transfer characteristics and services unchanged/transparent. Here, each sensor device has different functions and partially mixed characteristics and services. Ex.: for measuring the water left in a cistern, i use a ultrasonic sensor (distance measuring). The value will be calculated in percent and pushed to the Homekit as CurrentRelativeHumidity, to get the "drop sign" and percent value.
 
-* Each device will be identified by a client id to get the assigned sensor type and characteristic.
-
-     ---- client_id
-
-          ---- sensor classes
-
-               ---- characteristics
-
-                    ---- values
+* Each device will be identified by a client id to get the assigned sensor type and characteristic. (client_id -->> sensor classes --->> characteristics -->> values)
 
 
 The sensor device measure and send data by its own RTC clock interval in a json-like format (see sensor_example), then go into "deep sleep mode" to save battery capacity. The bridge detect incoming data by GPIO event. 
