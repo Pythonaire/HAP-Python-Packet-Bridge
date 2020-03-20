@@ -25,6 +25,7 @@ To change sensor devices, services or characteristics or add additional sensor d
 
 * Each device will be identified by a client id to get the assigned sensor type and characteristic.
 
+
 ---- client_id
 
      ---- sensor classes
@@ -32,6 +33,7 @@ To change sensor devices, services or characteristics or add additional sensor d
           ---- characteristics
 
                ---- values
+
 
 The sensor device measure and send data by its own RTC clock interval in a json-like format (see sensor_example), then go into "deep sleep mode" to save battery capacity. The bridge detect incoming data by GPIO event. 
 The Apple Homekit app (user GUI) could check the sensor state at any time. Because of a probably sleeping device the last/actually data are stored on the bridge to prevent SD card read/write error the data are stored as global variable (dictionary, mentioned above).
