@@ -2,10 +2,8 @@
 import board
 import busio
 import logging
-#import asyncio
 import digitalio
 import json
-#import adafruit_rfm69
 import rfm69_driver
 import RPi.GPIO as io
 import requests, socket
@@ -20,8 +18,7 @@ class Radio():
     CS = digitalio.DigitalInOut(board.CE1)
     RESET = digitalio.DigitalInOut(board.D25)
     spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)    
-    rfm69 = rfm69_driver.RFM69(spi, CS, RESET, RADIO_FREQ_MHZ)
-    #rfm69 = adafruit_rfm69.RFM69(spi, CS, RESET, RADIO_FREQ_MHZ) 
+    rfm69 = rfm69_driver.RFM69(spi, CS, RESET, RADIO_FREQ_MHZ) 
     #rfm69.tx_power= 20 # for RFM69HCW can by set between -2 and 20
     header = rfm69.preamble_length #set to default length of RadioHead RFM69 library
     # Optionally set an encryption key (16 byte AES key). MUST match both
@@ -50,7 +47,6 @@ class Radio():
     def get_data(self, irq):
         global devices
         self.irq = irq
-        logging.info("incoming data detected by irq: {0}".format(self.irq))
         data = self.rfm69.receive(keep_listening= True, with_header= True, rx_filter=self.server_id)
         if data != None:
             self.client_id = data[1] #client_id 10 = AM2302 + Moisture, 11 = Cistern
