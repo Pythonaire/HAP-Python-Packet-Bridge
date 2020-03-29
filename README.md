@@ -36,5 +36,5 @@ The Apple Homekit app (user GUI) could check the sensor state at any time. Becau
 
 ### additional (if needed)
 
-* send the sensor data to other http connected units
+* send the sensor data to other http connected units (request.get/post). You can uses this method to control http-connected devices (ex. switch characteristics).
 * to speed up the data exchange between transceiver process and HAP-Python (here a raspberry zero w - single core cpu) in case off multiple sensor devices, the transceiver process runs as python thread (see async_main.py)
