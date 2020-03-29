@@ -10,7 +10,7 @@ This repository put together the HAP-Python code from <https://github.com/ikalch
 Use the linked repository to install these basic libraries. 
 
 Put the files into your prefered path. Instead of "main.py", delivered by HAP-Python, use "async_main.py" to startup.
-It is tested with a Adafruit Feather M0 RFM69HCW for sensoring and Raspberry Pi Zero W as a bridge with 3 sensor devices.
+It is tested with a Raspberry Pi Zero W as a bridge and 3 devices, based on Adafruit Feather 433 MHz RFM69 (M0 SAMD21 mcu and 32u4 mcu).
 
 To change sensor devices, services or characteristics or add additional sensor devices, just place new classes into Sensor.py or change the existing.
 
@@ -21,7 +21,7 @@ To change sensor devices, services or characteristics or add additional sensor d
 * separate the homebridge communication from the sensor device communication
 * data buffering and handover by global variable (nested python dictionary), no "pickle" or other methods needed
 
-* By default, HAP-Python transfer characteristics and services unchanged/transparent. Here, each sensor device has different functions and partially mixed characteristics and services. Ex.: for measuring the water left in a cistern, i use a ultrasonic sensor (distance measuring). The value will be calculated in percent and pushed to the Homekit as CurrentRelativeHumidity, to get the "drop sign" and percent value.
+* By default, HAP-Python transfer characteristics and services unchanged/transparent. Here, each sensor device has different functions and partially mixed characteristics and services. Ex.: for measuring the water left in a cistern, you can use a ultrasonic sensor (distance measuring). The value could be calculated between 0 and 100 and pushed to the Homekit as CurrentRelativeHumidity, to get the "drop sign" and percent value.
 
 * Each device will be identified by a client id to get the assigned sensor type and characteristic. (client_id -->> sensor classes --->> characteristics -->> values)
 
