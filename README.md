@@ -12,7 +12,7 @@ Use the linked repository to install these basic libraries.
 Put the files into your prefered path. Instead of "main.py", delivered by HAP-Python, use "async_main.py" to startup.
 It is tested with a Raspberry Pi Zero W as a bridge and 3 devices, based on Adafruit Feather 433 MHz RFM69 (M0 SAMD21 mcu and 32u4 mcu).
 
-To change sensor devices, services or characteristics or add additional sensor devices, just place new classes into Sensor.py or change the existing.
+To change sensor devices, services or characteristics or add additional sensor devices, just place new classes into Sensors.py or change the existing. Changes or new classes needed to declared in "async_main.py" (bridge.add_accessory(your class (driver, 'your name to be displayed')))
 
 ## Significant changes/modification
 
