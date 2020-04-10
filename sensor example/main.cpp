@@ -134,7 +134,7 @@ void loop() {
   memcpy(radiopacket, (const char*)rpacket, sizeof(rpacket));
   if (manager.sendto(radiopacket, sizeof(radiopacket), SERVER_ADDRESS))
       {
-        manager.waitPacketSent(); // block until the packet is sent
+        //state = manager.waitPacketSent(10); // for testing block until the packet is sent
       }
 delay(50);
 rf69.sleep(); 
