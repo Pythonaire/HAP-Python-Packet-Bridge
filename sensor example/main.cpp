@@ -92,10 +92,6 @@ int ReadBattery() {
   digitalWrite(DHTPOWER, LOW);
  };
 
-void alarmMatch() {
-  delay(100);
-};
-
 void setup() {
   //Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT); digitalWrite(LED_BUILTIN, LOW); // LED off
@@ -119,6 +115,9 @@ void setup() {
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
                     rf69.setEncryptionKey(key);
 
+};
+void alarmMatch() {
+  delay(100);
 };
 void loop() {
   sensorVoltage = ReadBattery();
