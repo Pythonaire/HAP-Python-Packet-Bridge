@@ -49,4 +49,4 @@ Then transmit the data to the defined server. The sensor itself is defines as cl
 After that, the sensor go into deep sleep mode until the RTC wake up in the defined time "const uint8_t wait".
 The Transceiver.py detect incoming data, decode/convert and store them into nested dictionary (client id and values).In parallel, the data are send with http to a second device (here a OLED display).
 
-The HAP-Python code (Sensor.py) continuously check the dictionary and pull the data to the Apple Homekit along the HAP API definition "BatteryService", "HumiditySensor" and "TemperatureSensor".
+The HAP-Python code (Sensor.py) continuously check the dictionary and push the data to the Apple Homekit along the HAP API definition "BatteryService", "HumiditySensor" and "TemperatureSensor".
