@@ -50,3 +50,11 @@ After that, the sensor go into deep sleep mode until the RTC wake up in the defi
 The Transceiver.py detect incoming data, decode/convert and store them into nested dictionary (client id and values).In parallel, the data are send with http to a second device (here a OLED display).
 
 The HAP-Python code (Sensor.py) continuously check the dictionary and push the data to the Apple Homekit along the HAP API definition "BatteryService", "HumiditySensor" and "TemperatureSensor".
+
+## HttP notification
+
+If Homekit devices are able to be switched manually, we need the state too. "http_notification example" contain a http-brigde to foreward a notification, send by the switch. In this example, a radio can be switched on/off by the homekit app ( see Actor.py -> SwitchRadio). If the radio is switched on/off manually, it send the state update to the bridge (HttpAccessory.py) 
+        notification example form:  {"aid":2,"services": 
+                                    {"Switch": 
+                                    {"On": true}}} (or "On": false)
+
