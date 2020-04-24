@@ -39,7 +39,7 @@ class Radio():
         # if the selected DIO port have not the default 0 state, we need to set "pull_up_down=io.PUD_DOWN"
         logging.info("Start event detection on Pin: {0}".format(self.dio0_pin))
         io.setup(self.dio0_pin, io.IN,pull_up_down=io.PUD_DOWN)
-        io.add_event_detect(self.dio0_pin, io.RISING, callback = self.get_data, bouncetime = 100)
+        io.add_event_detect(self.dio0_pin, io.RISING, callback = self.get_data)
 
     def stop(self):
         io.remove_event_detect(self.dio0_pin)
