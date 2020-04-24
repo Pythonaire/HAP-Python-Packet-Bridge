@@ -60,6 +60,7 @@ void ReadSensors(float sensor_values[]) {
   Water.takeMeasurement();
   for (int i=0; i < 3; i++){
     pressure = pressure + Water.readPressure();
+    delay(500);
   }
   sensor_values[0]=pressure/3;
   digitalWrite(POW_WATER, LOW);
@@ -70,6 +71,7 @@ void ReadSensors(float sensor_values[]) {
   Air.takeMeasurement();
   for (int i=0; i < 3; i++){
     pressure = pressure + Air.readPressure();
+    delay(500);
   }
   sensor_values[1]=pressure/3;
   //sensor_values[1]=Air.readPressure();
@@ -96,17 +98,15 @@ void setup() {
     }
   // If you are using a high power RF69 eg RFM69HW, you *must* set a Tx power with the
   // ishighpowermodule flag set like this:
-  rf69.setTxPower(18, true);  // range from 14-20 for power, 2nd arg must be true for 69HCW
+  rf69.setTxPower(17, true);  // range from 14-20 for power, 2nd arg must be true for 69HCW
   // The encryption key has to be the same as the one in the server
   uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
   rf69.setEncryptionKey(key);
 };
-
 void alarmMatch() {
-  delay(100);
+  delay(10);
 };
-
 void loop() {
   sensorVoltage = ReadBattery();
   ReadSensors(sensor_values);
@@ -125,11 +125,8 @@ void loop() {
   //Serial.println(rpacket);
   uint8_t radiopacket[n]; // reduce to the needed packet size 'n'
   memcpy(radiopacket, (const char*)rpacket, sizeof(rpacket));
-  if (manager.sendto(radiopacket, sizeof(radiopacket), SERVER_ADDRESS))
-  { 
-    //state = manager.waitPacketSent(); // block until the packet is sent, for testing only
-  }
-  delay(10);
+  manager.sendto(radiopacket, sizeof(radiopacket), SERVER_ADDRESS);
+  delay(50);
   rf69.sleep();
   rtc.begin(true);
   rtc.setTime(hours, minutes, seconds);
