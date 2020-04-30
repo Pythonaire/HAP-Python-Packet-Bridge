@@ -6,7 +6,6 @@ import digitalio
 import json
 import rfm69_driver
 import RPi.GPIO as io
-import requests, socket, time
 
 logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 """
@@ -41,7 +40,7 @@ class RFMTransceiver():
         except RuntimeError:
             pass
 
-    def SwitchControl(self, value, to_node):
+    def send(self, value, to_node):
         value = bytes("{}".format(value),"UTF-8")
         to_node = to_node
         if to_node in RCV_DEV_VALUES: # delete old state

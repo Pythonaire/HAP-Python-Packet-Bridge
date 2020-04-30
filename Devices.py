@@ -1,7 +1,7 @@
 from pyhap.accessory import Accessory
 from pyhap.const import CATEGORY_SENSOR, CATEGORY_SWITCH
 from Transceiver import RFMTransceiver
-import logging
+import logging, time
 
 """Each class represent a device. 
 value = Radio().check_data() 'node#' and "key: key value"
@@ -121,6 +121,7 @@ class LPS33HW(Accessory):
         logging.info("Stopping accessory.")
 
 class WaterPump(Accessory):
+    """Switch for immension pump, state request with FF, switch with 0 and 1 by HAP switch characteristics"""
     category = CATEGORY_SWITCH
     def __init__(self, *args, **kwargs): 
         super().__init__(*args, **kwargs)
@@ -134,7 +135,7 @@ class WaterPump(Accessory):
         
     def set_switch(self, value): #value can be 1 or 0
         #start = time.monotonic()
-        RFMTransceiver().SwitchControl(value, self.number)
+        RFMTransceiver().send(value, self.number)
         r = self.request_state()
         #end = time.monotonic() - start
         #logging.info("**** run time: {} ***".format(end))
@@ -142,7 +143,7 @@ class WaterPump(Accessory):
 
     def get_switch(self):
         value = "FF"
-        RFMTransceiver().SwitchControl(value, self.number)
+        RFMTransceiver().send(value, self.number)
         r = self.request_state()
         self.char_on.set_value(r)
         return r
