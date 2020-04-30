@@ -39,4 +39,4 @@ Switches often operate manually and per software in parallel. Here, we using "FF
 
 ## RFM69 driver
 
-"rfm69_driver" is a modied driver version for the RFM69 chip set to work with interupts instead of continuously checking the chip buffer. 
+"rfm69_driver" is a modied driver version for the RFM69 chip set to work with a interrupt set by the RFM69 chip, instead of continuously checking the chip buffer. 
