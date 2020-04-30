@@ -8,11 +8,11 @@ This repository put together the HAP-Python code from <https://github.com/ikalch
 
 ## Installation
 
->install HAP-Python
+install HAP-Python
 
-´´´
+´
 pip3 install HAP-python[QRCode]
-´´´
+´
 
 >copy "main.py", "rfm69_driver.py", "Transceiver.py", "Devices.py" and "Devices.json" to you prefered path.
 >Prepare/modify "Devices.py" and "Device.json" with your own devices.
