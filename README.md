@@ -10,13 +10,13 @@ This repository put together the HAP-Python code from <https://github.com/ikalch
 
 install HAP-Python
 
-´
+```
 pip3 install HAP-python[QRCode]
-´
+```
 
->copy "main.py", "rfm69_driver.py", "Transceiver.py", "Devices.py" and "Devices.json" to you prefered path.
->Prepare/modify "Devices.py" and "Device.json" with your own devices.
->Create your own remote devices, see "sensor_example".
+* copy "main.py", "rfm69_driver.py", "Transceiver.py", "Devices.py" and "Devices.json" to you prefered path.
+* Prepare/modify "Devices.py" and "Device.json" with your own devices.
+* Create your own remote devices, see "sensor_example".
 
 All is tested with a Raspberry Pi Zero W as a bridge and 3 devices, based on Adafruit Feather 433 MHz RFM69 (M0 SAMD21 mcu and 32u4 mcu).
 
