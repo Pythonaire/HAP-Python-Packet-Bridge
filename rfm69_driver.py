@@ -347,6 +347,16 @@ class RFM69:
         self.tx_power = 13
         # last RSSI reading
         self.last_rssi = 0
+        self.to_node = _RH_BROADCAST_ADDRESS
+        self.from_node = _RH_BROADCAST_ADDRESS
+        # ID - contains seq count for reliable datagram mode
+        self.identifier = 0
+        # flags - identifies ack/reetry packet for reliable datagram mode
+        self.flags = 0
+        """Upper 4 bits reserved for use by Reliable Datagram Mode.
+           Lower 4 bits may be used to pass information.
+           Fourth byte of the RadioHead header.
+        """
 
     # pylint: disable=no-member
     # Reconsider this disable when it can be tested.
@@ -676,8 +686,7 @@ class RFM69:
         self._write_u8(_REG_FDEV_MSB, fdev >> 8)
         self._write_u8(_REG_FDEV_LSB, fdev & 0xFF)
 
-    def send(self, data, timeout=2.,
-             tx_header=(_RH_BROADCAST_ADDRESS, _RH_BROADCAST_ADDRESS, 0, 0)):
+    def send(self, data, to_node=None, from_node=None, identifier=None, flags=None):
         """Send a string of data using the transmitter.
            You can only send 60 bytes at a time
            (limited by chip's FIFO size and appended headers).
@@ -692,7 +701,8 @@ class RFM69:
         # buffer be within an expected range of bounds.  Disable this check.
         # pylint: disable=len-as-condition
         assert 0 < len(data) <= 60
-        assert len(tx_header) == 4, "tx header must be 4-tuple (To,From,ID,Flags)"
+        #assert len(tx_header) == 4, "tx header must be 4-tuple (To,From,ID,Flags)"
+
         # pylint: enable=len-as-condition
         self.idle()  # Stop receiving to clear FIFO and keep it clear.
         # Fill the FIFO with a packet to send.
@@ -703,10 +713,23 @@ class RFM69:
             # Add 4 bytes of headers to match RadioHead library.
             # Just use the defaults for global broadcast to all receivers
             # for now.
-            self._BUFFER[2] = tx_header[0] # Header: To
-            self._BUFFER[3] = tx_header[1] # Header: From
-            self._BUFFER[4] = tx_header[2] # Header: Id
-            self._BUFFER[5] = tx_header[3] # Header: Flags
+            if to_node is None:
+                self._BUFFER[2] = self.to_node # Header : To
+            else:
+                self._BUFFER[2] = to_node
+            if from_node is None:
+                self._BUFFER[3] = self.from_node # Header: From
+            else:
+                self._BUFFER[3] = from_node
+            if identifier is None:
+                self._BUFFER[4] = self.identifier # Header: Id
+            else:
+                self._BUFFER[4] = identifier
+            if flags is None:
+                self._BUFFER[5] = self.flags # Header: Flags
+            else:
+                self._BUFFER[5] = flags
+
             device.write(self._BUFFER, end=6)
             # Now send the payload.
             device.write(data)
@@ -714,18 +737,18 @@ class RFM69:
         self.transmit()
         # Wait for packet sent interrupt with explicit polling (not ideal but
         # best that can be done right now without interrupts).
-        start = time.monotonic()
-        timed_out = False
-        while not timed_out and not self.packet_sent:
-            if (time.monotonic() - start) >= timeout:
-                timed_out = True
+        #start = time.monotonic()
+        #timed_out = False
+        #while not timed_out and not self.packet_sent:
+        #    if (time.monotonic() - start) >= timeout:
+        #        timed_out = True
         # Go back to idle mode after transmit.
         self.idle()
-        if timed_out:
-            raise RuntimeError('Timeout during packet send')
+        #if timed_out:
+        #    raise RuntimeError('Timeout during packet send')
+        
 
-    def receive(self, keep_listening=True, with_header=False,
-                rx_filter=_RH_BROADCAST_ADDRESS):
+    def receive(self, keep_listening=True, rx_filter=_RH_BROADCAST_ADDRESS):
         """Wait to receive a packet from the receiver. Will wait for up to timeout_s amount of
            seconds for a packet to be received and decoded. If a packet is found the payload bytes
            are returned, otherwise None is returned (which indicates the timeout elapsed with no
@@ -747,7 +770,7 @@ class RFM69:
            the packet is ignored and None is returned.
         """
         # Make sure we are listening for packets.
-        # self.listen()
+        #self.listen()
         # Wait for the payload_ready interrupt.  This is not ideal and will
         # surely miss or overflow the FIFO when packets aren't read fast
         # enough, however it's the best that can be done from Python without
@@ -768,7 +791,6 @@ class RFM69:
             fifo_length = self._BUFFER[0]
             # Handle if the received packet is too small to include the 4 byte
             # RadioHead header--reject this packet and ignore it.
-            logging.info('rfm69.receive() - fifo_length: {0}'.format(fifo_length))
             if fifo_length < 5:
                 # Invalid packet, ignore it.  However finish reading the FIFO
                 # to clear the packet.
@@ -778,10 +800,8 @@ class RFM69:
                 packet = bytearray(fifo_length)
                 device.readinto(packet)
                 if (rx_filter != _RH_BROADCAST_ADDRESS and packet[0] != _RH_BROADCAST_ADDRESS
-                        and packet[0] != rx_filter):
+                        and packet[0] != rx_filter): #packet[0] = to
                     packet = None
-                elif not with_header:  # skip the header if not wanted
-                    packet = packet[4:]
         # Listen again if necessary and return the result packet.
         if keep_listening:
             self.listen()
