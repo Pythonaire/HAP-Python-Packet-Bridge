@@ -4,7 +4,7 @@ Python Homebridge for 433 MHz based sensors and actors .
 
 ![Image of hardware](Image1.png)
 
-This repository put together the HAP-Python code from <https://github.com/ikalchev/HAP-python> and the chip driver  <https://github.com/adafruit/Adafruit_CircuitPython_RFM69> with some modification.
+This repository put together the HAP-Python code from <https://github.com/ikalchev/HAP-python> and the chip driver  <https://github.com/adafruit/Adafruit_CircuitPython_RFM69> with some modification and enhancements.
 
 ## Installation
 
