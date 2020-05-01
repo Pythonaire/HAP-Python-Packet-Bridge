@@ -28,11 +28,11 @@ RFMTransceiver().start()
 
 def get_bridge(driver):
     # define and store accessory <--> RFM69_node id's 
-    bridge = Bridge(driver, 'RFMTest')
+    bridge = Bridge(driver, 'RFM69Gateway')
     for item in devices:
         num = devices[item]
         my_class = getattr(Devices,item)
-        bridge.add_accessory(my_class(driver,item, num))
+        bridge.add_accessory(my_class(num, driver, item))
         logging.info('****** load Accessory: {0}, Number: {1} *****'.format(item, num))
     #for manually use, example: bridge.add_accessory(your class(driver, 'your device name', node number))
     return bridge

@@ -14,10 +14,11 @@ logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 class SoilSensor(Accessory):
     """Humidity / Soil Sensor, check incoming new data every 60 seconds."""
     category = CATEGORY_SENSOR
-    def __init__(self, *args, **kwargs): # with injected rfm69_values
+    def __init__(self, node,  *args, **kwargs): # with injected rfm69_values
         super().__init__(*args, **kwargs)
         self.name = args[1] # args[1] contained the Sensor Name given
-        self.number = args[2] # args[1] contained the Sensor Number given
+        self.number = node
+        #self.number = args[2] # args[1] contained the Sensor Number given
         serv_soil = self.add_preload_service('HumiditySensor', chars=['CurrentRelativeHumidity'])
         serv_batt = self.add_preload_service('BatteryService', chars=['BatteryLevel','StatusLowBattery'])
         self.hum_char = serv_soil.configure_char('CurrentRelativeHumidity')
@@ -48,10 +49,10 @@ class AM2302(Accessory):
     """AM2302 combined Sensor"""
 
     category = CATEGORY_SENSOR
-    def __init__(self, *args, **kwargs): # with injected rfm69_values
+    def __init__(self, node, *args, **kwargs): # with injected rfm69_values
         super().__init__(*args, **kwargs)
         self.name = args[1] # args[1] contained the Sensor Name given
-        self.number = args[2] # args[1] contained the Sensor Number given
+        self.number = node # args[1] contained the Sensor Number given
         serv_temp = self.add_preload_service('TemperatureSensor', chars=['CurrentTemperature'])
         serv_hum = self.add_preload_service('HumiditySensor', chars=['CurrentRelativeHumidity'])
         serv_batt = self.add_preload_service('BatteryService', chars=['BatteryLevel','StatusLowBattery'])
@@ -84,10 +85,10 @@ class AM2302(Accessory):
 class LPS33HW(Accessory):
     """Distance Sensor, CurrentRelativeHumidity to give back the water value in percent"""
     category = CATEGORY_SENSOR
-    def __init__(self, *args, **kwargs): # with injected rfm69_values
+    def __init__(self, node, *args, **kwargs): # with injected rfm69_values
         super().__init__(*args, **kwargs)
         self.name = args[1] # args[1] contained the Sensor Name given
-        self.number = args[2] # args[1] contained the Sensor Number given
+        self.number = node # args[1] contained the Sensor Number given
         serv_cist = self.add_preload_service('HumiditySensor', chars=['CurrentRelativeHumidity'])
         serv_batt = self.add_preload_service('BatteryService', chars=['BatteryLevel','StatusLowBattery'])
         self.cist_char = serv_cist.configure_char('CurrentRelativeHumidity')
@@ -123,10 +124,10 @@ class LPS33HW(Accessory):
 class WaterPump(Accessory):
     """Switch for immension pump, state request with FF, switch with 0 and 1 by HAP switch characteristics"""
     category = CATEGORY_SWITCH
-    def __init__(self, *args, **kwargs): 
+    def __init__(self, node, *args, **kwargs): 
         super().__init__(*args, **kwargs)
         self.name = args[1] # args[1] contained the device/class Name given
-        self.number = args[2] # args[2] contained the device number given
+        self.number = node # args[2] contained the device number given
         serv_switch = self.add_preload_service('Switch')
         self.char_on = serv_switch.configure_char('On', setter_callback=self.set_switch)
         logging.info("**** Check the state of node #{}, found in Device.json ***".format(self.number))
