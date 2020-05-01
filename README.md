@@ -39,4 +39,8 @@ Switches often operate manually and per software in parallel. Here, we using "FF
 
 ## RFM69 driver
 
-"rfm69_driver" is a modied driver version for the RFM69 chip set to work with a interrupt set by the RFM69 chip, instead of continuously checking the chip buffer. 
+"rfm69_driver" is a modied driver version for the RFM69 chip set to work with a interrupt set by the RFM69 chip, instead of continuously checking the chip buffer.
+
+## AddOn - forward weather data
+
+"Transceiver.py" contained a function "http_forwarder" to transmit weather data to a http device, that display the data in a interval of 30 minutes (setInterval function).
