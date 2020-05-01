@@ -3,7 +3,7 @@ import board
 import busio
 import logging
 import digitalio
-import json
+import logging, json, threading, requests, socket
 import rfm69_driver
 import RPi.GPIO as io
 
@@ -40,6 +40,9 @@ class RFMTransceiver():
         except RuntimeError:
             pass
 
+    def stop(self):
+        io.remove_event_detect(self.dio0_pin)
+
     def mcu_send(self, value, to_node):
         value = bytes("{}".format(value),"UTF-8")
         to_node = to_node
@@ -48,9 +51,6 @@ class RFMTransceiver():
         self.stop()
         self.rfm69.send(value, to_node=to_node, from_node= self.NODE, identifier= None, flags= None)
         self.start()
-
-    def stop(self):
-        io.remove_event_detect(self.dio0_pin)
 
     def mcu_recv(self, irq):
         global RCV_DEV_VALUES
@@ -61,6 +61,38 @@ class RFMTransceiver():
             received_data = json.loads(payload.decode('utf8').replace("'", '"')) # replace ' with " and convert from json to python dict
             logging.info('*** from: {0} with RSSI: {1} got : {2}'.format(from_node, self.rfm69.last_rssi, received_data))
             RCV_DEV_VALUES[from_node] = received_data
+
+    def setInterval(interval): # for anync looping the rfm69.receiver
+        def decorator(function):
+            def wrapper(*args, **kwargs):
+                stopped = threading.Event()
+                def loop(): # executed in another thread
+                    while not stopped.wait(interval): # until stopped
+                        called_thread = threading.Thread(target=function(*args, **kwargs)) # function(*args, **kwargs) for decorator
+                        called_thread.start()
+                        called_thread.join() # wait for finishing 
+                t = threading.Thread(target=loop)
+                t.daemon = True # stop if the program exits
+                t.start()
+                return stopped
+            return wrapper
+        return decorator
+
+    @setInterval(1800)
+    def http_forwarder(self):
+        global RCV_DEV_VALUES
+        url = "http://PiRadio.local:8001/postjson"
+    
+        if "10" not in RCV_DEV_VALUES: # prevent error on bridge startup / restart
+            value = { "Hum":0, "Temp":0}
+        else:
+            value = RCV_DEV_VALUES["10"]
+        try:
+            requests.post(url, json=json.dumps(value)) # create json format and send
+        except socket.error as e:
+            logging.info('**** request.post got exception {0}'.format(e))
+        except:
+            logging.info("**** Something else went wrong ****")
 
     def check_data(self):
         global RCV_DEV_VALUES
