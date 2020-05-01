@@ -10,7 +10,7 @@ This repository put together the HAP-Python code from <https://github.com/ikalch
 
 install HAP-Python
 
-```
+```bash
 pip3 install HAP-python[QRCode]
 ```
 
