@@ -135,7 +135,7 @@ class WaterPump(Accessory):
         
     def set_switch(self, value): #value can be 1 or 0
         #start = time.monotonic()
-        RFMTransceiver().send(value, self.number)
+        RFMTransceiver().mcu_send(value, self.number)
         r = self.request_state()
         #end = time.monotonic() - start
         #logging.info("**** run time: {} ***".format(end))
@@ -143,7 +143,7 @@ class WaterPump(Accessory):
 
     def get_switch(self):
         value = "FF"
-        RFMTransceiver().send(value, self.number)
+        RFMTransceiver().mcu_send(value, self.number)
         r = self.request_state()
         self.char_on.set_value(r)
         return r

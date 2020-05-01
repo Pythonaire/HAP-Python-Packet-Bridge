@@ -36,11 +36,11 @@ class RFMTransceiver():
     def start(self): # start DIO detection for reading
         self.rfm69.listen()
         try:
-            io.add_event_detect(self.dio0_pin, io.RISING, callback = self.recv)
+            io.add_event_detect(self.dio0_pin, io.RISING, callback = self.mcu_recv)
         except RuntimeError:
             pass
 
-    def send(self, value, to_node):
+    def mcu_send(self, value, to_node):
         value = bytes("{}".format(value),"UTF-8")
         to_node = to_node
         if to_node in RCV_DEV_VALUES: # delete old state
@@ -52,7 +52,7 @@ class RFMTransceiver():
     def stop(self):
         io.remove_event_detect(self.dio0_pin)
 
-    def recv(self, irq):
+    def mcu_recv(self, irq):
         global RCV_DEV_VALUES
         data = self.rfm69.receive(keep_listening= True, rx_filter=self.NODE)
         if data != None:
