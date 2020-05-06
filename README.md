@@ -33,9 +33,9 @@ The 433 MHz packet communication is separated in "Transceiver.py". Incomimg data
 
 The mcu device itself send data in a needed interval - see "sensor example". The transceiver store the data in a dictionary. The bridge HAP side check continously the transceiver cache, here in a 30 seconds interval, and push the values to the homekit - see CATEGORY_SENSOR example. This helps to preserve capacity on battery powered devices, because this devices can go into deep sleep until the next, self defined, send action. The mcu state will never be triggered.
 
-### two way - example CATEGORY_SWITCH
+### two way - example CATEGORY_SPRINKLER
 
-Switches, for example, often be controlled manually and per software in parallel. To get the real state, a "send/confim/state" interaction is needed. Here, we using "FF" for a status request, "0" for Off, "1" for On. The correct state will be confirmed by the mcu with a {"ACK": value}. Additional on bridge startup, the switch start state will be checked - see class "WaterPump" and the corresponding "switch.cpp" for the mcu, how it can work.
+Switches or sprinkler servies, for example, often be controlled manually and per software in parallel. To get the real state, a "send/confim/state" interaction is needed. Here, we using "FF" for a status request, "0" for Off, "1" for On. The correct state will be confirmed by the mcu with a {"ACK": value}. Additional on bridge startup, the switch start state will be checked - see class "WaterPump" and the corresponding "switch.cpp" for the mcu, how it can work.
 
 ## RFM69 driver
 
