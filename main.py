@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import logging, signal, json
-import signal
 from pyhap.accessory import Accessory, Bridge
 from pyhap.accessory_driver import AccessoryDriver
 from Transceiver import RFMTransceiver
@@ -24,7 +23,8 @@ devices = json.load(file)
 file.close()
 
 logging.info(" *** initializing the RFM69 Transmitter ***")
-RFMTransceiver().start()
+RFMTransceiver().start_recv()
+
 
 def get_bridge(driver):
     # define and store accessory <--> RFM69_node id's 
@@ -36,7 +36,7 @@ def get_bridge(driver):
         logging.info('****** load Accessory: {0}, Number: {1} *****'.format(item, num))
     #for manually use, example: bridge.add_accessory(your class(driver, 'your device name', node number))
     return bridge
-    
+
 driver = AccessoryDriver(port=51826, persist_file='home.state')
 driver.add_accessory(accessory=get_bridge(driver))
 signal.signal(signal.SIGTERM, driver.signal_handler)

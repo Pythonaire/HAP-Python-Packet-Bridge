@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
 from pyhap.accessory import Accessory
-from pyhap.const import CATEGORY_SENSOR, CATEGORY_SWITCH
+from pyhap.const import CATEGORY_SENSOR, CATEGORY_SPRINKLER
 from Transceiver import RFMTransceiver
-import logging, time
+import logging, time, threading, asyncio
 
 """Each class represent a device. 
 value = Radio().check_data() 'node#' and "key: key value"
@@ -17,8 +18,7 @@ class SoilSensor(Accessory):
     def __init__(self, node,  *args, **kwargs): # with injected rfm69_values
         super().__init__(*args, **kwargs)
         self.name = args[1] # args[1] contained the Sensor Name given
-        self.number = node
-        #self.number = args[2] # args[1] contained the Sensor Number given
+        self.number = node # node number
         serv_soil = self.add_preload_service('HumiditySensor', chars=['CurrentRelativeHumidity'])
         serv_batt = self.add_preload_service('BatteryService', chars=['BatteryLevel','StatusLowBattery'])
         self.hum_char = serv_soil.configure_char('CurrentRelativeHumidity')
@@ -27,7 +27,7 @@ class SoilSensor(Accessory):
 
     @Accessory.run_at_interval(30)
     async def run(self):
-        received = RFMTransceiver().check_data()
+        received = RFMTransceiver().receive_cache()
         if self.number not in received: # prevent error on bridge startup / restart
             value = {"Charge": 0, "Soil":0}
         else:
@@ -41,9 +41,6 @@ class SoilSensor(Accessory):
         else:
             self.battstatus_char.set_value(0)
         self.hum_char.set_value(value["Soil"])
-
-    def stop(self):
-        logging.info("Stopping accessory.")
 
 class AM2302(Accessory):
     """AM2302 combined Sensor"""
@@ -63,7 +60,7 @@ class AM2302(Accessory):
 
     @Accessory.run_at_interval(30)
     async def run(self):
-        received = RFMTransceiver().check_data()
+        received = RFMTransceiver().receive_cache()
         if self.number not in received: # prevent error on bridge startup / restart
             value = {"Charge": 0, "Hum":0, "Temp":0}
         else:
@@ -79,8 +76,6 @@ class AM2302(Accessory):
         self.hum_char.set_value(value["Hum"])
         self.temp_char.set_value(value["Temp"])
 
-    def stop(self):
-        logging.info("Stopping accessory.")
 
 class LPS33HW(Accessory):
     """Distance Sensor, CurrentRelativeHumidity to give back the water value in percent"""
@@ -97,7 +92,7 @@ class LPS33HW(Accessory):
 
     @Accessory.run_at_interval(30)
     async def run(self):
-        received = RFMTransceiver().check_data()
+        received = RFMTransceiver().receive_cache()
         if self.number not in received: # prevent error on bridge startup / restart
             value = {"Charge":0,"AP": 0,"WP":0,"DP":0}
         else:
@@ -110,53 +105,78 @@ class LPS33HW(Accessory):
         else:
             self.battstatus_char.set_value(0)
         # value["DP"] is the difference between AP and WP, the measured pressure 
-        # the sensor stands on 1,1 meter beneath the cistern top = 108 hPa + air pressure
-        maxValue = 108
+        # the sensor stands on 1,1 meter beneath the cistern = 107 hPa
         if value["DP"] <= 0:
             WaterPercent = 0
         else:
-            WaterPercent = value["DP"] * 100 / maxValue
+            WaterPercent = value["DP"] * 1,1 / 107 * 100
         self.cist_char.set_value(WaterPercent)
 
-    def stop(self):
-        logging.info("Stopping accessory.")
 
 class WaterPump(Accessory):
-    """Switch for immension pump, state request with FF, switch with 0 and 1 by HAP switch characteristics"""
-    category = CATEGORY_SWITCH
+    """Switch for immension pump, state request with FF, switch with 0 and 1 """
+    category = CATEGORY_SPRINKLER
+
+    @classmethod
+    def requestrfm(_cls, cmd, node):
+        RFMTransceiver().mcu_send(cmd, node)
+        while not node in RFMTransceiver().receive_cache():
+            time.sleep(0.1)
+        ACK = RFMTransceiver().receive_cache()[node]["ACK"]
+        return ACK
+    
     def __init__(self, node, *args, **kwargs): 
         super().__init__(*args, **kwargs)
         self.name = args[1] # args[1] contained the device/class Name given
-        self.number = node # args[2] contained the device number given
-        serv_switch = self.add_preload_service('Switch')
-        self.char_on = serv_switch.configure_char('On', setter_callback=self.set_switch)
-        logging.info("**** Check the state of node #{}, found in Device.json ***".format(self.number))
-        self.get_switch() # get the initial state for faster startup
-        self.char_on = serv_switch.configure_char('On', getter_callback=self.get_switch)
-        
-    def set_switch(self, value): #value can be 1 or 0
-        #start = time.monotonic()
-        RFMTransceiver().mcu_send(value, self.number)
-        r = self.request_state()
-        #end = time.monotonic() - start
-        #logging.info("**** run time: {} ***".format(end))
-        self.char_on.set_value(r)
+        self.node = node # args[2] contained the device number given
+        confirm = self.requestrfm( 0, self.node) # startup value
+        serv_valve = self.add_preload_service('Valve',[
+            'Active',
+            'ValveType',
+            'InUse',
+            'SetDuration',
+            'RemainingDuration',
+            'IsConfigured',
+            'Name'
+        ])
+        serv_valve.configure_char('Name', value = "Immension Pump")
+        serv_valve.configure_char('ValveType', value = 1)
+        serv_valve.configure_char('IsConfigured', value = 1)
+        self.active_on = serv_valve.configure_char('Active', setter_callback=self.set_state)
+        self.active_state = serv_valve.configure_char('Active', getter_callback=self.get_state)
+        self.inUse = serv_valve.configure_char('InUse', value = confirm)
+        self.duration = serv_valve.configure_char('SetDuration', value = 0) # value in seconds
+        self.rem_duration = serv_valve.configure_char('RemainingDuration')
 
-    def get_switch(self):
-        value = "FF"
-        RFMTransceiver().mcu_send(value, self.number)
-        r = self.request_state()
-        self.char_on.set_value(r)
-        return r
+    def duration_off(self):
+        confirm = self.requestrfm(0, self.node)
+        self.active_on.set_value(0)
+        self.inUse.set_value(confirm)
+        self.inUse.notify()
+        self.rem_duration.set_value(0)
 
-    def request_state(self):
-        ACK = None
-        while ACK == None:
-            try:
-                ACK = RFMTransceiver().check_data()[self.number]['ACK']
-            except:
-                time.sleep(0.1)
-        return ACK
-        
-    def stop(self):
-        logging.info("Stopping accessory.")
+    def set_state(self, value):
+        duration = self.duration.get_value()
+        self.rem_duration.set_value(duration)
+        if value ==1 and duration > 0:
+            confirm = self.requestrfm(value, self.node)
+            self.inUse.set_value(confirm)
+            self.inUse.notify()
+            timer = threading.Timer(duration, self.duration_off)
+            timer.start()
+        else:
+            self.rem_duration.set_value(0)
+            confirm = self.requestrfm(value, self.node)
+            self.inUse.set_value(confirm)
+            self.inUse.notify()
+        return value
+
+    def get_state(self):
+        if self.node not in RFMTransceiver().receive_cache():
+            cached = self.requestrfm("FF", self.node)
+        else:
+            cached = RFMTransceiver().receive_cache()[self.node]['ACK']
+            self.active_state.set_value(cached)
+            self.inUse.set_value(cached)
+            self.inUse.notify()
+            return cached

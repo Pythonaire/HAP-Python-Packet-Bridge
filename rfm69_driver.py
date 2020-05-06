@@ -70,9 +70,6 @@ Implementation Notes
 import time
 
 import adafruit_bus_device.spi_device as spidev
-import logging
-
-logging.basicConfig(level=logging.INFO, format="[%(module)s] %(message)s")
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_RFM69.git"
@@ -686,7 +683,7 @@ class RFM69:
         self._write_u8(_REG_FDEV_MSB, fdev >> 8)
         self._write_u8(_REG_FDEV_LSB, fdev & 0xFF)
 
-    def send(self, data, to_node=None, from_node=None, identifier=None, flags=None):
+    def send(self, data, to_node, from_node, identifier, flags):
         """Send a string of data using the transmitter.
            You can only send 60 bytes at a time
            (limited by chip's FIFO size and appended headers).
@@ -702,7 +699,6 @@ class RFM69:
         # pylint: disable=len-as-condition
         assert 0 < len(data) <= 60
         #assert len(tx_header) == 4, "tx header must be 4-tuple (To,From,ID,Flags)"
-
         # pylint: enable=len-as-condition
         self.idle()  # Stop receiving to clear FIFO and keep it clear.
         # Fill the FIFO with a packet to send.
@@ -710,26 +706,13 @@ class RFM69:
             self._BUFFER[0] = (_REG_FIFO | 0x80)  # Set top bit to 1 to
                                                   # indicate a write.
             self._BUFFER[1] = (len(data) + 4) & 0xFF
-            # Add 4 bytes of headers to match RadioHead library.
-            # Just use the defaults for global broadcast to all receivers
-            # for now.
-            if to_node is None:
-                self._BUFFER[2] = self.to_node # Header : To
-            else:
-                self._BUFFER[2] = to_node
-            if from_node is None:
-                self._BUFFER[3] = self.from_node # Header: From
-            else:
-                self._BUFFER[3] = from_node
-            if identifier is None:
-                self._BUFFER[4] = self.identifier # Header: Id
-            else:
-                self._BUFFER[4] = identifier
-            if flags is None:
-                self._BUFFER[5] = self.flags # Header: Flags
-            else:
-                self._BUFFER[5] = flags
-
+            try:
+                self._BUFFER[2] = to_node # Header: To
+                self._BUFFER[3] = from_node # Header: From
+                self._BUFFER[4] = identifier # Header: Id
+                self._BUFFER[5] = flags # Header: Flags
+            except TypeError:
+                raise RuntimeError('header not filled!')
             device.write(self._BUFFER, end=6)
             # Now send the payload.
             device.write(data)
@@ -737,15 +720,8 @@ class RFM69:
         self.transmit()
         # Wait for packet sent interrupt with explicit polling (not ideal but
         # best that can be done right now without interrupts).
-        #start = time.monotonic()
-        #timed_out = False
-        #while not timed_out and not self.packet_sent:
-        #    if (time.monotonic() - start) >= timeout:
-        #        timed_out = True
         # Go back to idle mode after transmit.
         self.idle()
-        #if timed_out:
-        #    raise RuntimeError('Timeout during packet send')
         
 
     def receive(self, keep_listening=True, rx_filter=_RH_BROADCAST_ADDRESS):
