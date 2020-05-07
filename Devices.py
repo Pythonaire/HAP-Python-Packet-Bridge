@@ -154,6 +154,8 @@ class WaterPump(Accessory):
         self.inUse.set_value(confirm)
         self.inUse.notify()
         self.rem_duration.set_value(0)
+        self.duration.set_value(0)
+
 
     def set_state(self, value):
         duration = self.duration.get_value()
