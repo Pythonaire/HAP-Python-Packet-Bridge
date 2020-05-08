@@ -105,11 +105,14 @@ class LPS33HW(Accessory):
         else:
             self.battstatus_char.set_value(0)
         # value["DP"] is the difference between AP and WP, the measured pressure 
-        # the sensor stands on 1,1 meter beneath the cistern = 107 hPa
-        if value["DP"] <= 0:
+        # the sensor stands on 1,15 meter beneath cistern top (plus 50 cm maintenance tube = 165 cm) = 113 hPa
+        DiffPressure = value["WP"] - value["AP"]
+        if DiffPressure <=0: 
             WaterPercent = 0
+        elif DiffPressure >= 113:
+            WaterPercent = 100
         else:
-            WaterPercent = value["DP"] * 1,1 / 107 * 100
+            WaterPercent = DiffPressure * 100 / 113
         self.cist_char.set_value(WaterPercent)
 
 

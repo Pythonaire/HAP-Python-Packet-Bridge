@@ -12,7 +12,7 @@
 #define RFM69_RST     4
 
 #define CLIENT_ADDRESS 12 // RHDatagram
-#define SERVER_ADDRESS 2 // RHDatagram
+#define SERVER_ADDRESS 1 // RHDatagram
 
 RH_RF69 rf69(RFM69_CS, RFM69_INT);
 RHDatagram manager(rf69, CLIENT_ADDRESS);
@@ -20,17 +20,17 @@ uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
 
 
 void setup() {
-  Serial.begin(115200);
-  while (!Serial) { delay(1);}
+  //Serial.begin(115200);
+  //while (!Serial) { delay(1);}
   pinMode(LED_BUILTIN, OUTPUT); digitalWrite(LED_BUILTIN, LOW); // LED off
   // manual reset the radio
   pinMode(RFM69_RST, OUTPUT);
   digitalWrite(RFM69_RST, HIGH); delay(10);
   digitalWrite(RFM69_RST, LOW); delay(10);
   if (!manager.init()) {
-    Serial.println("init failed"); 
+    //Serial.println("init failed"); 
     while (1);}
-    Serial.println("RFM69 radio init OK!");
+    //Serial.println("RFM69 radio init OK!");
   // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250,
   //  +13dbM (for low power module) and No encryption
   if (!rf69.setFrequency(RF69_FREQ)) 
@@ -60,10 +60,10 @@ void state(String s){
       return_state = 0;
       digitalWrite(LED_BUILTIN, LOW);}
     char rpacket[60];
-    int n = sprintf(rpacket, "{'ACK':%d}", return_state);
+    int n = sprintf(rpacket, "{'ACK': %d}", return_state);
     uint8_t radiopacket[n]; // reduce to the needed packet size 'n'
-    Serial.print("reply with data: ");
-    Serial.println(rpacket);
+    //Serial.print("reply with data: ");
+    //Serial.println(rpacket);
     memcpy(radiopacket, (const char*)rpacket, sizeof(rpacket));
     // for testing, give the server time to handle data
     delay(200); 
@@ -86,15 +86,14 @@ void loop() {
     uint8_t from = SERVER_ADDRESS;
     if (manager.recvfrom(buf, &len, &from))
     {
-      Serial.print("got request from : 0x");
-      Serial.print(from, HEX);
+      //Serial.print("got request from : 0x");
+      //Serial.print(from, HEX);
       String s = convertToString((char*)buf,len);
-      Serial.print(" , string s is: ");
-      Serial.print(s);
-      Serial.print(", with length: ");
-      Serial.println(len);
+      //Serial.print(" , string s is: ");
+      //Serial.print(s);
+      //Serial.print(", with length: ");
+      //Serial.println(len);
       state(s);
     }
   }
-  //rf69.sleep();
 };
