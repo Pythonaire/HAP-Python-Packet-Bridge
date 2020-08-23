@@ -19,13 +19,13 @@ pip3 install HAP-python[QRCode]
 * Create your own remote devices, see "sensor_example",
 * start the bridge as systemd service.
 
-All is tested with a Raspberry Pi Zero W as a bridge and 3 devices, based on Adafruit Feather 433 MHz RFM69 (M0 SAMD21 mcu and 32u4 mcu).
+All is tested with a Raspberry Pi Zero W and Pi 3B as a bridge and 3 devices, based on Adafruit Feather 433 MHz RFM69 (M0 SAMD21 mcu and 32u4 mcu).
 
 ## Working principle (Device.json, Devices.py and main.py)
 
-"Device.json" have to contain all device, you like to use. "Device.json" is json-like formated : {"device name": node number, "device name": node number, ....}". The key "device name" must correspond to the class name in "Device.py". Once defined and started the "main.py" will read "Devices.json", load all devices, node id's and publish them to the Apple Homekit. For testing, you can bypass the automatic, see "main.py" function "get_bridge()". The communication to 433 Mhz binded devices is separated in "Transceiver.py" and will started automatically.
+"Device.json" have to contain all device, you like to use. "Device.json" is json-like formated : {"device name": node number, "device name": node number, ....}". The key "device name" must correspond to the class name in "Device.py". Once defined and started the "main.py" will read "Devices.json", load all device classes, node id's and publish them to the Apple Homekit. For testing, you can bypass the automatic, see "main.py" function "get_bridge()". The communication to 433 Mhz binded devices is separated in "Transceiver.py" and will started automatically.
 
-## one way or two way communication - Transceiver.py
+## one way and two way communication - Transceiver.py
 
 The 433 MHz packet communication is separated in "Transceiver.py". Incomimg data are detected by interrupt (here GPIO(BCM) 24) and cached in a dictionary to prevent useless network traffic.
 
